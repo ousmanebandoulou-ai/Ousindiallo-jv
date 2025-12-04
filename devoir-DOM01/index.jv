@@ -1,0 +1,677 @@
+/**
+ * ========================================
+ * PANIER D'ACHAT - MISE À JOUR AUTOMATIQUE DES PRIX TOTAUX
+ * ========================================
+ * 
+ * 🎯 OBJECTIF : Voir le prix total ajusté automatiquement en fonction :
+ *    ✅ Des changements de quantité
+ *    ✅ Des suppressions d'articles
+ * 
+ * ═══════════════════════════════════════════════════════════════════
+ * 1. MISE À JOUR AUTOMATIQUE LORS DES CHANGEMENTS DE QUANTITÉ
+ * ═══════════════════════════════════════════════════════════════════
+ *    ➕ Bouton "+" → Augmente quantité → Prix total recalculé IMMÉDIATEMENT
+ *    ➖ Bouton "-" → Diminue quantité → Prix total recalculé IMMÉDIATEMENT
+ *    ⌨️ Input quantité → Modifie quantité → Prix total recalculé après validation
+ * 
+ *    📊 MISES À JOUR AUTOMATIQUES :
+ *       • Sous-total de l'article (prix × nouvelle quantité)
+ *       • Sous-total panier (somme de tous les articles)
+ *       • Taxes (15% du sous-total)
+ *       • TOTAL FINAL (sous-total + taxes)
+ * 
+ * ═══════════════════════════════════════════════════════════════════
+ * 2. MISE À JOUR AUTOMATIQUE LORS DES SUPPRESSIONS
+ * ═══════════════════════════════════════════════════════════════════
+ *    🗑️ Suppression d'un article → Prix total ajusté AUTOMATIQUEMENT
+ *       • Article retiré du calcul
+ *       • Nouveau sous-total calculé
+ *       • Taxes recalculées
+ *       • Total final mis à jour
+ * 
+ *    📦 Vidage du panier → Tous les totaux remis à zéro
+ * 
+ * ═══════════════════════════════════════════════════════════════════
+ * 3. FORMULE DE CALCUL DES PRIX
+ * ═══════════════════════════════════════════════════════════════════
+ *    Sous-total article = Prix unitaire × Quantité
+ *    Sous-total panier = Σ (Sous-total de chaque article)
+ *    Taxes = Sous-total panier × 15%
+ *    TOTAL FINAL = Sous-total panier + Taxes
+ * 
+ * 💡 Tous les prix sont mis à jour en TEMPS RÉEL sans rechargement !
+ * ========================================
+ */
+
+// Articles présélectionnés dans le panier
+let panier = [
+    {
+        id: 1,
+        nom: "Laptop Dell XPS 15",
+        prix: 1299.99,
+        quantite: 1,
+        image: "https://via.placeholder.com/100x100?text=Laptop",
+        aime: false
+    },
+    {
+        id: 2,
+        nom: "Souris sans fil Logitech",
+        prix: 29.99,
+        quantite: 2,
+        image: "https://via.placeholder.com/100x100?text=Souris",
+        aime: false
+    },
+    {
+        id: 3,
+        nom: "Clavier mécanique RGB",
+        prix: 89.99,
+        quantite: 1,
+        image: "https://via.placeholder.com/100x100?text=Clavier",
+        aime: false
+    },
+    {
+        id: 4,
+        nom: "Webcam HD 1080p",
+        prix: 59.99,
+        quantite: 1,
+        image: "https://via.placeholder.com/100x100?text=Webcam",
+        aime: false
+    }
+];
+
+// Fonction pour formater le prix en euros
+function formaterPrix(prix) {
+    return prix.toFixed(2) + " €";
+}
+
+/**
+ * Calcule le sous-total d'un article (prix unitaire × quantité)
+ * @param {Object} article - L'article avec ses propriétés (prix, quantite)
+ * @returns {number} Le sous-total de l'article
+ */
+function calculerSousTotalArticle(article) {
+    return article.prix * article.quantite;
+}
+
+/**
+ * Calcule le sous-total de tout le panier
+ * Additionne les sous-totaux de tous les articles présents dans le panier
+ * @returns {number} Le sous-total total du panier
+ */
+function calculerSousTotalPanier() {
+    return panier.reduce((total, article) => {
+        return total + calculerSousTotalArticle(article);
+    }, 0);
+}
+
+/**
+ * Calcule les taxes (15% du sous-total)
+ * @param {number} sousTotal - Le sous-total du panier
+ * @returns {number} Le montant des taxes
+ */
+function calculerTaxes(sousTotal) {
+    return sousTotal * 0.15;
+}
+
+/**
+ * Calcule le total final à payer
+ * Total = Sous-total + Taxes
+ * @returns {number} Le total final à payer
+ */
+function calculerTotal() {
+    const sousTotal = calculerSousTotalPanier();
+    const taxes = calculerTaxes(sousTotal);
+    return sousTotal + taxes;
+}
+
+/**
+ * Fonction pour mettre à jour l'affichage des totaux du panier
+ * 
+ * ═══════════════════════════════════════════════════════════════════
+ * MISE À JOUR AUTOMATIQUE DU PRIX TOTAL
+ * ═══════════════════════════════════════════════════════════════════
+ * 
+ * Cette fonction recalcule et affiche automatiquement les prix :
+ * 
+ * 📊 CALCUL DES PRIX :
+ * 1. Sous-total article = Prix unitaire × Quantité
+ * 2. Sous-total panier = Somme de tous les sous-totaux articles
+ * 3. Taxes = 15% du sous-total panier
+ * 4. Total final = Sous-total panier + Taxes
+ * 
+ * 🔄 MISE À JOUR AUTOMATIQUE LORS DE :
+ * - ✅ Changement de quantité (boutons + ou -)
+ * - ✅ Modification directe de la quantité (input)
+ * - ✅ Suppression d'un article
+ * - ✅ Vidage du panier
+ * - ✅ Initialisation du panier
+ * 
+ * 🎨 EFFETS VISUELS :
+ * - Animation de couleur lors de la mise à jour
+ * - Mise à jour en temps réel sans rechargement
+ * 
+ * @returns {void}
+ */
+function mettreAJourTotaux() {
+    // Vérifier que les éléments DOM existent avant de les mettre à jour
+    const elSousTotal = document.getElementById("sousTotal");
+    const elTaxes = document.getElementById("taxes");
+    const elTotal = document.getElementById("total");
+    
+    if (!elSousTotal || !elTaxes || !elTotal) {
+        // Les éléments n'existent pas encore, on ne peut pas mettre à jour
+        return;
+    }
+    
+    // Calculer les nouveaux totaux
+    const sousTotal = calculerSousTotalPanier();
+    const taxes = calculerTaxes(sousTotal);
+    const total = calculerTotal();
+    
+    // Animation de changement pour montrer que les valeurs ont été mises à jour
+    [elSousTotal, elTaxes, elTotal].forEach(element => {
+        element.style.transition = "color 0.3s ease";
+        element.style.color = "#667eea";
+        
+        setTimeout(() => {
+            element.style.color = "";
+        }, 300);
+    });
+    
+    // Mettre à jour l'affichage des valeurs
+    elSousTotal.textContent = formaterPrix(sousTotal);
+    elTaxes.textContent = formaterPrix(taxes);
+    elTotal.textContent = formaterPrix(total);
+}
+
+// Fonction pour afficher un article dans le panier
+function afficherArticle(article) {
+    const panierArticles = document.getElementById("panierArticles");
+    const sousTotalArticle = calculerSousTotalArticle(article);
+
+    // Initialiser la propriété "aime" si elle n'existe pas
+    if (article.aime === undefined) {
+        article.aime = false;
+    }
+
+    const articleDiv = document.createElement("div");
+    articleDiv.className = "cart-item";
+    articleDiv.setAttribute("data-id", article.id);
+
+    articleDiv.innerHTML = `
+        <div class="item-image">
+            <img src="${article.image}" alt="${article.nom}">
+        </div>
+        <div class="item-details">
+            <div class="item-header">
+                <h3 class="item-nom">${article.nom}</h3>
+                <!-- Bouton cœur pour aimer/ne plus aimer l'article -->
+                <!-- 🤍 = Cœur blanc (non aimé) | ❤️ = Cœur rouge (aimé) -->
+                <button class="btn-aimer ${article.aime ? 'aime' : ''}" 
+                        data-id="${article.id}" 
+                        title="${article.aime ? 'Ne plus aimer' : 'Aimer'}">
+                    <span class="coeur-icon">${article.aime ? '❤️' : '🤍'}</span>
+                </button>
+            </div>
+            <p class="item-prix">${formaterPrix(article.prix)}</p>
+        </div>
+        <div class="item-quantity">
+            <!-- Bouton "-" pour diminuer la quantité -->
+            <button class="btn-quantity btn-decrease" data-id="${article.id}" title="Diminuer la quantité">-</button>
+            <!-- Input pour afficher et modifier directement la quantité -->
+            <input type="number" 
+                   class="quantity-input" 
+                   value="${article.quantite}" 
+                   min="1" 
+                   data-id="${article.id}">
+            <!-- Bouton "+" pour augmenter la quantité -->
+            <button class="btn-quantity btn-increase" data-id="${article.id}" title="Augmenter la quantité">+</button>
+        </div>
+        <div class="item-subtotal">
+            <span class="subtotal-value">${formaterPrix(sousTotalArticle)}</span>
+        </div>
+        <div class="item-actions">
+            <!-- Bouton pour supprimer l'article du panier -->
+            <button class="btn-supprimer" data-id="${article.id}" title="Supprimer cet article du panier">🗑️</button>
+        </div>
+    `;
+
+    panierArticles.appendChild(articleDiv);
+
+    // Ajouter les événements pour cet article
+    ajouterEvenementsArticle(articleDiv, article);
+}
+
+// Fonction pour trouver un article par son ID
+function trouverArticleParId(id) {
+    return panier.find(article => article.id === id);
+}
+
+/**
+ * Fonction pour ajouter les événements DOM à un article
+ * 
+ * Cette fonction gère tous les événements interactifs pour chaque article :
+ * 
+ * AJUSTEMENT DES QUANTITÉS avec les boutons "+" et "-" :
+ * - Bouton "-" : Diminue la quantité de 1 (minimum 1)
+ *   * Si quantité > 1 : diminue la quantité et met à jour les totaux
+ *   * Si quantité = 1 : ne fait rien (quantité minimum)
+ * 
+ * - Bouton "+" : Augmente la quantité de 1 (pas de limite maximale)
+ *   * Augmente toujours la quantité et met à jour les totaux
+ * 
+ * AUTRES FONCTIONNALITÉS :
+ * - Modification directe de la quantité via l'input
+ * - Suppression d'article (bouton 🗑️)
+ * - Ajout aux favoris (bouton cœur ❤️/🤍)
+ * 
+ * @param {HTMLElement} articleDiv - L'élément DOM de l'article
+ * @param {Object} article - L'objet article avec ses propriétés
+ */
+function ajouterEvenementsArticle(articleDiv, article) {
+    const btnDecrease = articleDiv.querySelector(".btn-decrease");
+    const btnIncrease = articleDiv.querySelector(".btn-increase");
+    const quantityInput = articleDiv.querySelector(".quantity-input");
+    const btnSupprimer = articleDiv.querySelector(".btn-supprimer");
+    const btnAimer = articleDiv.querySelector(".btn-aimer");
+
+    // ========================================
+    // ÉVÉNEMENT : Ajuster la quantité avec les boutons "+" et "-"
+    // ========================================
+    
+    // ===== BOUTON "-" : Diminuer la quantité =====
+    // Cliquer sur "-" réduit la quantité de 1 (minimum 1)
+    btnDecrease.addEventListener("click", (e) => {
+        e.preventDefault(); // Empêcher le comportement par défaut
+        e.stopPropagation(); // Empêcher la propagation
+        
+        // Trouver l'article dans le panier pour avoir la référence à jour
+        const articleActuel = trouverArticleParId(article.id);
+        
+        // Vérifier que l'article existe et que la quantité peut être diminuée (minimum 1)
+        if (articleActuel && articleActuel.quantite > 1) {
+            // Diminuer la quantité
+            articleActuel.quantite--;
+            
+            // Mettre à jour l'affichage de l'input
+            quantityInput.value = articleActuel.quantite;
+            
+            // Mettre à jour le sous-total de l'article et les totaux globaux
+            mettreAJourArticle(articleDiv, articleActuel);
+        } else if (articleActuel && articleActuel.quantite === 1) {
+            // Si la quantité est déjà à 1, informer l'utilisateur (optionnel)
+            // La quantité reste à 1, on ne fait rien
+        }
+    });
+
+    // ===== BOUTON "+" : Augmenter la quantité =====
+    // Cliquer sur "+" augmente la quantité de 1 (pas de limite maximale)
+    btnIncrease.addEventListener("click", (e) => {
+        e.preventDefault(); // Empêcher le comportement par défaut
+        e.stopPropagation(); // Empêcher la propagation
+        
+        // Trouver l'article dans le panier pour avoir la référence à jour
+        const articleActuel = trouverArticleParId(article.id);
+        
+        // Vérifier que l'article existe
+        if (articleActuel) {
+            // Augmenter la quantité
+            articleActuel.quantite++;
+            
+            // Mettre à jour l'affichage de l'input
+            quantityInput.value = articleActuel.quantite;
+            
+            // Mettre à jour le sous-total de l'article et les totaux globaux
+            mettreAJourArticle(articleDiv, articleActuel);
+        }
+    });
+
+    // ===== ÉVÉNEMENT : Modifier la quantité via l'input directement =====
+    quantityInput.addEventListener("change", (e) => {
+        const nouvelleQuantite = parseInt(e.target.value) || 1;
+        const articleActuel = trouverArticleParId(article.id);
+        if (articleActuel) {
+            if (nouvelleQuantite >= 1) {
+                articleActuel.quantite = nouvelleQuantite;
+                mettreAJourArticle(articleDiv, articleActuel);
+            } else {
+                // Si la quantité est invalide, remettre à 1
+                articleActuel.quantite = 1;
+                e.target.value = 1;
+                mettreAJourArticle(articleDiv, articleActuel);
+            }
+        }
+    });
+
+    // ===== ÉVÉNEMENT : Empêcher la saisie de valeurs négatives ou nulles =====
+    quantityInput.addEventListener("input", (e) => {
+        let valeur = parseInt(e.target.value);
+        if (isNaN(valeur) || valeur < 1) {
+            e.target.value = 1;
+        }
+    });
+
+    // ========================================
+    // ÉVÉNEMENT : Supprimer l'article du panier (bouton 🗑️)
+    // ========================================
+    // Cliquer sur le bouton poubelle supprime définitivement l'article du panier
+    // - Demande confirmation avant de supprimer
+    // - Retire l'article du tableau panier
+    // - Supprime l'élément du DOM avec animation
+    // - Met à jour automatiquement les totaux
+    // - Affiche un message de confirmation
+    btnSupprimer.addEventListener("click", (e) => {
+        e.preventDefault(); // Empêcher le comportement par défaut
+        e.stopPropagation(); // Empêcher la propagation de l'événement
+        
+        // Appeler la fonction de suppression avec l'ID de l'article
+        supprimerArticle(article.id);
+    });
+
+    // ========================================
+    // ÉVÉNEMENT : Aimer/Ne plus aimer avec le bouton cœur ❤️/🤍
+    // ========================================
+    // Cliquer sur le bouton cœur permet d'ajouter ou retirer l'article des favoris
+    // - Cœur blanc 🤍 = article non aimé
+    // - Cœur rouge ❤️ = article aimé (favoris)
+    // - Change de couleur en temps réel
+    // - Animation lors du changement
+    // - Affiche un message de confirmation
+    btnAimer.addEventListener("click", (e) => {
+        e.preventDefault(); // Empêcher le comportement par défaut
+        e.stopPropagation(); // Empêcher la propagation de l'événement
+        
+        // Appeler la fonction pour basculer l'état "aimer"
+        toggleAimerArticle(article.id, articleDiv);
+    });
+}
+
+/**
+ * Fonction pour mettre à jour l'affichage d'un article
+ * 
+ * ═══════════════════════════════════════════════════════════════════
+ * MISE À JOUR AUTOMATIQUE LORS DU CHANGEMENT DE QUANTITÉ
+ * ═══════════════════════════════════════════════════════════════════
+ * 
+ * Cette fonction est appelée automatiquement quand :
+ * - ➕ La quantité est augmentée avec le bouton "+"
+ * - ➖ La quantité est diminuée avec le bouton "-"
+ * - ⌨️ La quantité est modifiée directement dans l'input
+ * 
+ * ACTIONS EFFECTUÉES :
+ * 1. Recalcule le sous-total de l'article (prix × nouvelle quantité)
+ * 2. Met à jour l'affichage du sous-total de l'article
+ * 3. Recalcule automatiquement les totaux globaux du panier :
+ *    - Sous-total panier
+ *    - Taxes (15%)
+ *    - Total final
+ * 
+ * 💡 Le prix total s'ajuste automatiquement en temps réel !
+ * 
+ * @param {HTMLElement} articleDiv - L'élément DOM de l'article
+ * @param {Object} article - L'objet article avec ses propriétés (prix, quantite)
+ */
+function mettreAJourArticle(articleDiv, article) {
+    // Calculer le nouveau sous-total de l'article (prix × quantité)
+    const sousTotalArticle = calculerSousTotalArticle(article);
+    const subtotalValue = articleDiv.querySelector(".subtotal-value");
+    
+    // Mettre à jour le sous-total affiché de l'article
+    if (subtotalValue) {
+        // Animation visuelle pour montrer le changement
+        subtotalValue.style.transition = "color 0.3s ease";
+        subtotalValue.style.color = "#667eea";
+        
+        setTimeout(() => {
+            subtotalValue.style.color = "";
+        }, 300);
+        
+        subtotalValue.textContent = formaterPrix(sousTotalArticle);
+    }
+    
+    // Mettre à jour automatiquement les totaux globaux du panier
+    // (sous-total, taxes, total final)
+    mettreAJourTotaux();
+}
+
+/**
+ * Fonction pour basculer l'état "aimer" d'un article
+ * 
+ * Cette fonction gère le changement de couleur du cœur :
+ * - Cœur blanc 🤍 = Article non aimé (état initial)
+ * - Cœur rouge ❤️ = Article aimé (ajouté aux favoris)
+ * 
+ * FONCTIONNEMENT :
+ * 1. Vérifie que l'article existe
+ * 2. Bascule l'état "aimer" (true/false)
+ * 3. Change l'icône du cœur (🤍 → ❤️ ou ❤️ → 🤍)
+ * 4. Ajoute/retire la classe CSS "aime"
+ * 5. Animation de zoom lors du changement
+ * 6. Met à jour le tooltip
+ * 7. Affiche un message de confirmation
+ * 
+ * @param {number} id - L'identifiant unique de l'article
+ * @param {HTMLElement} articleDiv - L'élément DOM de l'article
+ */
+function toggleAimerArticle(id, articleDiv) {
+    // Trouver l'article dans le panier
+    const article = trouverArticleParId(id);
+    
+    // Vérifier que l'article existe
+    if (!article) {
+        return;
+    }
+
+    // Basculer l'état "aimer" (true devient false, false devient true)
+    article.aime = !article.aime;
+    
+    // Trouver les éléments DOM du bouton cœur et de l'icône
+    const btnAimer = articleDiv.querySelector(".btn-aimer");
+    const coeurIcon = articleDiv.querySelector(".coeur-icon");
+    
+    // Vérifier que les éléments existent
+    if (btnAimer && coeurIcon) {
+        // ===== ANIMATION : Effet de zoom lors du clic =====
+        btnAimer.style.transform = "scale(1.2)";
+        
+        // Changer la couleur et l'icône après un court délai (pour l'animation)
+        setTimeout(() => {
+            if (article.aime) {
+                // ===== ARTICLE AIMÉ : Cœur rouge ❤️ =====
+                coeurIcon.textContent = "❤️"; // Cœur rouge
+                btnAimer.classList.add("aime"); // Ajouter la classe CSS pour le style
+                btnAimer.setAttribute("title", "Ne plus aimer"); // Mettre à jour le tooltip
+                
+                // Message de confirmation
+                afficherMessage(`"${article.nom}" a été ajouté à vos favoris ❤️`, "success");
+            } else {
+                // ===== ARTICLE NON AIMÉ : Cœur blanc 🤍 =====
+                coeurIcon.textContent = "🤍"; // Cœur blanc
+                btnAimer.classList.remove("aime"); // Retirer la classe CSS
+                btnAimer.setAttribute("title", "Aimer"); // Mettre à jour le tooltip
+                
+                // Message de confirmation
+                afficherMessage(`"${article.nom}" a été retiré de vos favoris`, "info");
+            }
+            
+            // Remettre le bouton à sa taille normale après l'animation
+            btnAimer.style.transform = "scale(1)";
+        }, 150); // Délai de 150ms pour l'animation
+    }
+}
+
+/**
+ * Fonction pour supprimer un article du panier
+ * 
+ * ═══════════════════════════════════════════════════════════════════
+ * MISE À JOUR AUTOMATIQUE DU PRIX TOTAL APRÈS SUPPRESSION
+ * ═══════════════════════════════════════════════════════════════════
+ * 
+ * Cette fonction gère la suppression complète d'un article :
+ * 
+ * PROCESSUS DE SUPPRESSION :
+ * 1. ✅ Vérifie que l'article existe dans le panier
+ * 2. ✅ Demande confirmation à l'utilisateur
+ * 3. ✅ Retire l'article du tableau panier
+ * 4. ✅ Supprime l'élément du DOM avec animation
+ * 5. ✅ Met à jour AUTOMATIQUEMENT les totaux :
+ *       - Sous-total panier (sans l'article supprimé)
+ *       - Taxes recalculées (15% du nouveau sous-total)
+ *       - Total final ajusté
+ * 6. ✅ Affiche des messages de confirmation
+ * 7. ✅ Gère le cas où le panier devient vide
+ * 
+ * 💡 Le prix total s'ajuste automatiquement après chaque suppression !
+ * 
+ * @param {number} id - L'identifiant unique de l'article à supprimer
+ */
+function supprimerArticle(id) {
+    // Étape 1 : Trouver l'article à supprimer pour afficher son nom dans la confirmation
+    const articleASupprimer = trouverArticleParId(id);
+    
+    // Vérifier que l'article existe
+    if (!articleASupprimer) {
+        afficherMessage("Article introuvable dans le panier.", "warning");
+        return;
+    }
+
+    // Étape 2 : Demander confirmation avant de supprimer (avec le nom de l'article)
+    const confirmation = confirm(
+        `Êtes-vous sûr de vouloir supprimer "${articleASupprimer.nom}" du panier ?`
+    );
+    
+    // Si l'utilisateur confirme la suppression
+    if (confirmation) {
+        // Étape 3 : Retirer l'article du tableau panier
+        // Utiliser filter() pour créer un nouveau tableau sans l'article supprimé
+        panier = panier.filter(article => article.id !== id);
+        
+        // Étape 4 : Trouver et supprimer l'élément DOM correspondant
+        const articleDiv = document.querySelector(`.cart-item[data-id="${id}"]`);
+        
+        if (articleDiv) {
+            // Animation de suppression (fondu et glissement vers la gauche)
+            articleDiv.style.transition = "opacity 0.3s, transform 0.3s";
+            articleDiv.style.opacity = "0";
+            articleDiv.style.transform = "translateX(-20px)";
+            
+            // Supprimer l'élément après l'animation (300ms)
+            setTimeout(() => {
+                articleDiv.remove();
+                
+                // Étape 5 : Mettre à jour les totaux APRÈS la suppression visuelle
+                mettreAJourTotaux();
+            }, 300);
+        } else {
+            // Si l'élément DOM n'existe pas, mettre à jour immédiatement
+            mettreAJourTotaux();
+        }
+        
+        // Étape 6 : Afficher un message de confirmation
+        afficherMessage(`"${articleASupprimer.nom}" a été supprimé du panier.`, "success");
+        
+        // Étape 7 : Gérer le cas où le panier devient vide après suppression
+        if (panier.length === 0) {
+            setTimeout(() => {
+                afficherMessage("Votre panier est maintenant vide.", "info");
+                // Réinitialiser l'affichage pour montrer le message "panier vide"
+                initialiserPanier();
+            }, 500);
+        }
+    } else {
+        // Si l'utilisateur annule, ne rien faire
+        // (l'article reste dans le panier)
+    }
+}
+
+// Fonction pour vider le panier
+function viderPanier() {
+    if (panier.length === 0) {
+        afficherMessage("Le panier est déjà vide.", "info");
+        return;
+    }
+
+    if (confirm("Êtes-vous sûr de vouloir vider tout le panier ?")) {
+        panier = [];
+        document.getElementById("panierArticles").innerHTML = "";
+        mettreAJourTotaux();
+        afficherMessage("Le panier a été vidé avec succès.", "success");
+    }
+}
+
+// Fonction pour valider la commande
+function validerCommande() {
+    if (panier.length === 0) {
+        afficherMessage("Votre panier est vide. Veuillez ajouter des articles avant de valider.", "warning");
+        return;
+    }
+
+    const total = calculerTotal();
+    const message = `Commande validée avec succès !\n\nTotal à payer: ${formaterPrix(total)}\n\nNombre d'articles: ${panier.length}\n\nMerci pour votre achat !`;
+    
+    alert(message);
+    
+    // Optionnel: réinitialiser le panier après validation
+    // viderPanier();
+}
+
+// Fonction pour afficher un message (optionnel, peut être améliorée avec une meilleure UI)
+function afficherMessage(message, type = "info") {
+    // Créer une notification temporaire
+    const notification = document.createElement("div");
+    notification.className = `notification notification-${type}`;
+    notification.textContent = message;
+    document.body.appendChild(notification);
+
+    setTimeout(() => {
+        notification.classList.add("show");
+    }, 10);
+
+    setTimeout(() => {
+        notification.classList.remove("show");
+        setTimeout(() => {
+            notification.remove();
+        }, 300);
+    }, 3000);
+}
+
+// Fonction pour initialiser le panier
+function initialiserPanier() {
+    const panierArticles = document.getElementById("panierArticles");
+    
+    if (panier.length === 0) {
+        panierArticles.innerHTML = `
+            <div class="empty-cart">
+                <p>Votre panier est vide.</p>
+            </div>
+        `;
+    } else {
+        panierArticles.innerHTML = "";
+        panier.forEach(article => {
+            afficherArticle(article);
+        });
+    }
+    
+    mettreAJourTotaux();
+}
+
+// ========================================
+// ÉVÉNEMENTS DOM GLOBAUX
+// ========================================
+// Tous les événements sont attachés après le chargement complet du DOM
+document.addEventListener("DOMContentLoaded", () => {
+    // Initialiser le panier au chargement de la page
+    initialiserPanier();
+
+    // ===== ÉVÉNEMENT : Vider le panier =====
+    const btnViderPanier = document.getElementById("viderPanier");
+    if (btnViderPanier) {
+        btnViderPanier.addEventListener("click", viderPanier);
+    }
+
+    // ===== ÉVÉNEMENT : Valider la commande =====
+    const btnValiderCommande = document.getElementById("validerCommande");
+    if (btnValiderCommande) {
+        btnValiderCommande.addEventListener("click", validerCommande);
+    }
+});

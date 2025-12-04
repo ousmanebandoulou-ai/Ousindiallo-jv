@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panier d'achat</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛒 Mon Panier d'Achat</h1>
+        </header>
+
+        <div class="cart-container">
+            <div class="cart-header">
+                <h2>Articles dans votre panier</h2>
+                <button id="viderPanier" class="btn-vider">Vider le panier</button>
+            </div>
+
+            <div id="panierArticles" class="cart-items">
+                <!-- Les articles seront ajoutés dynamiquement -->
+            </div>
+
+            <div class="cart-footer">
+                <div class="cart-summary">
+                    <div class="summary-row">
+                        <span>Sous-total:</span>
+                        <span id="sousTotal">0.00 €</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Taxes (15%):</span>
+                        <span id="taxes">0.00 €</span>
+                    </div>
+                    <div class="summary-row total-row">
+                        <span>Total:</span>
+                        <span id="total">0.00 €</span>
+                    </div>
+                </div>
+                <button id="validerCommande" class="btn-valider">Valider la commande</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="panier.js"></script>
+</body>
+</html>
+
