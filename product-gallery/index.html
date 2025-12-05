@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Galerie produits — Demo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container">
+      <h1 class="logo">Ma Boutique</h1>
+      <div class="controls">
+        <button id="themeToggle" aria-pressed="false" aria-label="Basculer thème clair foncé">🌙</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <h2>Galerie de produits</h2>
+      <p class="lead">Animations fluides, accessible, mode clair / sombre — construit avec HTML, CSS & JS purs.</p>
+    </section>
+
+    <section class="gallery" aria-label="Produits disponibles">
+      <!-- Product card template: duplicate or generate via JS in real app -->
+      <article class="card" tabindex="0">
+        <div class="media" aria-hidden="true">
+          <svg viewBox="0 0 120 80" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
+            <rect width="120" height="80" rx="8" fill="url(#g1)"></rect>
+            <defs>
+              <linearGradient id="g1" x1="0" x2="1">
+                <stop offset="0" stop-color="#ffd6e0" />
+                <stop offset="1" stop-color="#c7b3ff" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3 class="product-title">Casque Acoustic Pro</h3>
+          <p class="price">€129</p>
+          <p class="desc">Son clair, réduction de bruit passive, confort toute la journée.</p>
+          <div class="card-actions">
+            <button class="btn primary">Voir</button>
+            <button class="btn ghost">Ajouter</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" tabindex="0">
+        <div class="media" aria-hidden="true">
+          <svg viewBox="0 0 120 80" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
+            <rect width="120" height="80" rx="8" fill="url(#g2)"></rect>
+            <defs>
+              <linearGradient id="g2" x1="0" x2="1">
+                <stop offset="0" stop-color="#dffcfa" />
+                <stop offset="1" stop-color="#a9e0ff" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3 class="product-title">Montre Connectée</h3>
+          <p class="price">€89</p>
+          <p class="desc">Suivi santé, autonomie 7 jours, écran Amoled.</p>
+          <div class="card-actions">
+            <button class="btn primary">Voir</button>
+            <button class="btn ghost">Ajouter</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card" tabindex="0">
+        <div class="media" aria-hidden="true">
+          <svg viewBox="0 0 120 80" preserveAspectRatio="xMidYMid slice" role="img" aria-hidden="true">
+            <rect width="120" height="80" rx="8" fill="url(#g3)"></rect>
+            <defs>
+              <linearGradient id="g3" x1="0" x2="1">
+                <stop offset="0" stop-color="#fff1c4" />
+                <stop offset="1" stop-color="#ffd7a8" />
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div class="card-body">
+          <h3 class="product-title">Enceinte Portable</h3>
+          <p class="price">€59</p>
+          <p class="desc">Étanche IP67, son puissant et compact.</p>
+          <div class="card-actions">
+            <button class="btn primary">Voir</button>
+            <button class="btn ghost">Ajouter</button>
+          </div>
+        </div>
+      </article>
+
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">© 2025 — Ma Boutique</div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
