@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galerie Produits Premium | Thème Clair/Foncé</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Variables CSS pour le thème clair */
+        :root {
+            --primary-bg: #f8f9fa;
+            --secondary-bg: #ffffff;
+            --primary-text: #212529;
+            --secondary-text: #6c757d;
+            --accent: #4361ee;
+            --accent-light: #e0e7ff;
+            --accent-dark: #3a56d4;
+            --border: #e9ecef;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.12);
+            --transition-smooth: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.1);
+        }
+
+        /* Variables pour le thème sombre */
+        .dark-theme {
+            --primary-bg: #121212;
+            --secondary-bg: #1e1e1e;
+            --primary-text: #f8f9fa;
+            --secondary-text: #adb5bd;
+            --accent: #5a7dff;
+            --accent-light: #2d3748;
+            --accent-dark: #4361ee;
+            --border: #2d2d2d;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --card-shadow-hover: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background-color: var(--primary-bg);
+            color: var(--primary-text);
+            line-height: 1.6;
+            transition: var(--transition-smooth);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* En-tête avec bouton de thème */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 50px;
+            padding: 20px 0;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 70px;
+            height: 34px;
+            background-color: var(--secondary-bg);
+            border-radius: 50px;
+            border: 2px solid var(--border);
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 8px;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            left: 4px;
+            transition: var(--transition-smooth);
+            z-index: 1;
+        }
+
+        .dark-theme .theme-toggle::before {
+            transform: translateX(36px);
+        }
+
+        .theme-toggle i {
+            font-size: 1.1rem;
+            z-index: 2;
+        }
+
+        .fa-sun {
+            color: #f39c12;
+        }
+
+        .fa-moon {
+            color: #f1c40f;
+        }
+
+        /* Titre principal */
+        .main-title {
+            text-align: center;
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .main-title h1 {
+            font-size: 2.8rem;
+            margin-bottom: 15px;
+            background: linear-gradient(90deg, var(--accent), #6c63ff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .main-title p {
+            font-size: 1.2rem;
+            color: var(--secondary-text);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Galerie de produits */
+        .products-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 60px;
+        }
+
+        .product-card {
+            background-color: var(--secondary-bg);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--card-shadow);
+            width: 100%;
+            max-width: 350px;
+            transition: var(--transition-smooth);
+            opacity: 0;
+            transform: translateY(30px);
+            animation: fadeInUp 0.8s ease forwards;
+            position: relative;
+        }
+
+        .product-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .product-card:nth-child(2) {
+            animation-delay: 0.4s;
+        }
+
+        .product-card:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .product-card:hover {
+            transform: translateY(-15px);
+            box-shadow: var(--card-shadow-hover);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: var(--accent);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .product-image {
+            height: 220px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s ease;
+        }
+
+        .product-card:hover .product-image img {
+            transform: scale(1.1);
+        }
+
+        .product-info {
+            padding: 30px;
+        }
+
+        .product-category {
+            color: var(--accent);
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .product-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-text);
+        }
+
+        .product-description {
+            color: var(--secondary-text);
+            margin-bottom: 20px;
+            line-height: 1.7;
+        }
+
+        .product-features {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+
+        .product-features li {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--secondary-text);
+        }
+
+        .product-features i {
+            color: var(--accent);
+            font-size: 0.9rem;
+        }
+
+        .product-price-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .product-price {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .add-to-cart {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+        }
+
+        .add-to-cart:hover {
+            background-color: var(--accent-dark);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(67, 97, 238, 0.4);
+        }
+
+        .add-to-cart.added {
+            background-color: #10b981;
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            color: var(--secondary-text);
+            margin-top: 40px;
+            padding-top: 30px;
+            border-top: 1px solid var(--border);
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .footer p {
+            margin-bottom: 10px;
+        }
+
+        .theme-hint {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 15px;
+        }
+
+        /* Animation pour le changement de thème */
+        .theme-transition * {
+            transition: background-color 0.4s ease, 
+                        color 0.4s ease, 
+                        border-color 0.4s ease,
+                        box-shadow 0.4s ease !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 1100px) {
+            .products-gallery {
+                gap: 30px;
+            }
+            
+            .product-card {
+                max-width: 320px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .products-gallery {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .product-card {
+                max-width: 450px;
+            }
+            
+            .main-title h1 {
+                font-size: 2.4rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            
+            .main-title h1 {
+                font-size: 2rem;
+            }
+            
+            .product-info {
+                padding: 25px;
+            }
+            
+            .product-price-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+            
+            .add-to-cart {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-gem"></i>
+                <span>LuxeTech</span>
+            </div>
+            
+            <div class="theme-toggle" id="themeToggle">
+                <i class="fas fa-sun"></i>
+                <i class="fas fa-moon"></i>
+            </div>
+        </header>
+        
+        <section class="main-title">
+            <h1>Galerie Produits Premium</h1>
+            <p>Découvrez notre sélection exclusive avec des animations fluides et un design élégant en mode clair ou sombre.</p>
+        </section>
+        
+        <section class="products-gallery" id="productsGallery">
+            <!-- Les cartes de produits seront générées par JavaScript -->
+        </section>
+        
+        <footer class="footer">
+            <p>© 2023 LuxeTech Galerie. Tous droits réservés.</p>
+            <p class="theme-hint">Cliquez sur le bouton de thème en haut à droite pour changer l'apparence</p>
+        </footer>
+    </div>
+
+    <script>
+        // Données des produits
+        const products = [
+            {
+                id: 1,
+                name: "Écouteurs Sans Fil Pro",
+                category: "Audio",
+                price: 229.99,
+                description: "Écouteurs haut de gamme avec annulation active du bruit et qualité audio exceptionnelle.",
+                features: [
+                    "Annulation active du bruit",
+                    "Autonomie 30h",
+                    "Chargement rapide",
+                    "Qualité Hi-Res"
+                ],
+                badge: "Nouveau",
+                image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                id: 2,
+                name: "Montre Connectée Elite",
+                category: "Wearable",
+                price: 349.99,
+                description: "Montre intelligente avec écran AMOLED, suivi santé avancé et design premium.",
+                features: [
+                    "Écran AMOLED toujours actif",
+                    "Suivi ECG et SpO2",
+                    "Résistance à l'eau 50m",
+                    "Batterie 7 jours"
+                ],
+                badge: "Best-seller",
+                image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+            },
+            {
+                id: 3,
+                name: "Enceinte Portable Hi-Fi",
+                category: "Audio",
+                price: 179.99,
+                description: "Enceinte Bluetooth avec son 360°, résistante à l'eau et à la poussière.",
+                features: [
+                    "Son 360° immersif",
+                    "Résistance IP67",
+                    "Autonomie 24h",
+                    "Assistant vocal intégré"
+                ],
+                badge: "Promotion",
+                image: "https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+            }
+        ];
+
+        // Éléments DOM
+        const themeToggle = document.getElementById('themeToggle');
+        const productsGallery = document.getElementById('productsGallery');
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier le thème préféré
+            const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('luxetech-theme');
+            
+            // Appliquer le thème sauvegardé ou celui du système
+            if (savedTheme === 'dark' || (!savedTheme && prefersDarkMode)) {
+                document.body.classList.add('dark-theme');
+            }
+            
+            // Générer les cartes de produits
+            renderProductCards();
+            
+            // Ajouter l'effet de transition pour le changement de thème
+            setTimeout(() => {
+                document.body.classList.add('theme-transition');
+            }, 100);
+        });
+
+        // Gestionnaire du bouton de thème
+        themeToggle.addEventListener('click', function() {
+            // Basculer le thème
+            document.body.classList.toggle('dark-theme');
+            
+            // Sauvegarder la préférence
+            const isDarkTheme = document.body.classList.contains('dark-theme');
+            localStorage.setItem('luxetech-theme', isDarkTheme ? 'dark' : 'light');
+            
+            // Animation du bouton
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 200);
+        });
+
+        // Rendu des cartes de produits
+        function renderProductCards() {
+            productsGallery.innerHTML = '';
+            
+            products.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    ${product.badge ? <div class="product-badge">${product.badge}</div> : ''}
+                    
+                    <div class="product-image">
+                        <img src="${product.image}" alt="${product.name}">
+                    </div>
+                    
+                    <div class="product-info">
+                        <div class="product-category">${product.category}</div>
+                        <h3 class="product-title">${product.name}</h3>
+                        <p class="product-description">${product.description}</p>
+                        
+                        <ul class="product-features">
+                            ${product.features.map(feature => `
+                                <li><i class="fas fa-check-circle"></i> ${feature}</li>
+                            `).join('')}
+                        </ul>
+                        
+                        <div class="product-price-container">
+                            <div class="product-price">${product.price.toFixed(2)}€</div>
+                            <button class="add-to-cart" data-id="${product.id}">
+                                <i class="fas fa-shopping-cart"></i>
+                                Ajouter au panier
+                            </button>
+                        </div>
+                    </div>
+                `;
+                
+                productsGallery.appendChild(productCard);
+            });
+            
+            // Ajouter les gestionnaires d'événements pour les boutons "Ajouter au panier"
+            document.querySelectorAll('.add-to-cart').forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.dataset.id);
+                    const product = products.find(p => p.id === productId);
+                    
+                    // Animation d'ajout au panier
+                    this.classList.add('added');
+                    this.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
+                    
+                    // Effet de vibration légère
+                    this.parentElement.parentElement.style.transform = 'scale(1.02)';
+                    setTimeout(() => {
+                        this.parentElement.parentElement.style.transform = '';
+                    }, 300);
+                    
+                    // Réinitialiser après 2 secondes
+                    setTimeout(() => {
+                        this.classList.remove('added');
+                        this.innerHTML = '<i class="fas fa-shopping-cart"></i> Ajouter au panier';
+                    }, 2000);
+                    
+                    console.log(Produit ajouté: ${product.name} - ${product.price}€);
+                });
+            });
+            
+            // Ajouter des effets de survol supplémentaires
+            document.querySelectorAll('.product-card').forEach(card => {
+                // Effet de luminosité sur l'image au survol
+                const image = card.querySelector('.product-image');
+                
+                card.addEventListener('mouseenter', function() {
+                    image.style.filter = 'brightness(1.05)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    image.style.filter = 'brightness(1)';
+                });
+            });
+        }
+
+        // Animation supplémentaire pour le titre au chargement
+        window.addEventListener('load', function() {
+            const title = document.querySelector('.main-title');
+            title.style.animation = 'fadeInUp 0.8s ease forwards';
+        });
+    </script>
+</body>
+</html>
